@@ -1,51 +1,65 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const Content = () => {
-const [searchTerm, setSearchTerm] = useState("");
-const [articles, setArticles] = useState([]);
+const API_KEY = "1d43adec9e5c4a508292f5dfb1ffe7bd";
 
-const handleSearch = e => {
-setSearchTerm(e.target.value);
-};
+function Content() {
+  const [articles, setArticles] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-useEffect(() => {
-const fetchData = async () => {
-    const apikey = 'bb41abc2027b412b8457e911738ea14f'
-    const result = await axios(`https://newsapi.org/v2/everything?q=${searchTerm}&apiKey=${apikey}`);
-    setArticles(result.data.articles);
-    };
-    fetchData();
-}, [searchTerm]);
+  useEffect(() => {
+    axios
+      .get(
+        `https://newsapi.org/v2/top-headlines?country=us&apiKey=${API_KEY}`
+      )
+      .then((res) => {
+        setArticles(res.data.articles);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
-return (
-<div className="container-fluid">
-		<div className="row d-flex justify-content-center mr-4">
-            <form className="input-group mb-3 mt-4 search">
-                <input
-                    className="form-control input"
-                    type="text"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    placeholder="Search news articles"
-                />
-                <button 
-                    className="btn btn-primary" 
-                    onClick={() => setSearchTerm("")}
-                >
-                    Clear
-                </button>
-            </form>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    axios
+      .get(
+        `https://newsapi.org/v2/everything?q=${searchTerm}&apiKey=${API_KEY}`
+      )
+      .then((res) => {
+        setArticles(res.data.articles);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  return (
+    <div className="container-fluid">
+	<div className="row d-flex justify-content-center mr-4">
+      <form 
+        className="input-group mb-4 mt-4 search"
+        onSubmit={handleSubmit}>
+        <input
+          className="form-control input"
+          type="text"
+          placeholder="Search news..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button className="btn btn-primary" type="submit">Go</button>
+      </form>
+    </div>
+      {articles.map((article, index) => (
+        <div className="text-center mt-3" key={index}>
+          <h2>{article.title}</h2>
+          <img style={{widht:'200px', height:'100px'}} src={article.urlToImage} alt={article.title} />
+          <p>{article.description}</p>
+          <a href={article.url}>Read more</a>
         </div>
-                {articles.map(article => (
-                <div key={article.title}>
-                    <h3>{article.title}</h3>
-                    <p>{article.description}</p>
-                    <a href={article.url}>Read more</a>
-                </div>
-                ))}
-</div>
-);
-};
+      ))}
+    </div>
+  );
+}
 
 export default Content;
